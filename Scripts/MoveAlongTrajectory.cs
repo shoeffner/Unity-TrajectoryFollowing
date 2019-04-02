@@ -12,14 +12,14 @@ public class MoveAlongTrajectory : MonoBehaviour
     [Tooltip("Start moving when the game starts, otherwise move on pressing space.")]
     public bool startAutomatically = true;
 
-    private float offset;
+    private float currentOffset;
     private bool moving;
 
     public void Awake() {
         if (trajectory == null) {
             trajectory = this.GetComponent<Trajectory>();
         }
-        offset = 0.0f;
+        currentOffset = 0.0f;
     }
 
     public void Start() {
@@ -38,8 +38,8 @@ public class MoveAlongTrajectory : MonoBehaviour
 
     public void Update() {
         if (moving) {
-            offset += Time.deltaTime * speed;
-            transform.position = trajectory.GetAt(offset);
+            currentOffset += Time.deltaTime * speed;
+            transform.position = trajectory.GetAt(currentOffset);
         }
     }
 }
