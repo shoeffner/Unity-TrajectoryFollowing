@@ -16,7 +16,7 @@ public class TrajectoryEditor : Editor
             if (EditorGUI.EndChangeCheck()) {
                 Undo.RecordObject(trajectoryComponent, "Change trajectory.");
                 trajectory[i] = target;
-                // trajectoryComponent.Update();
+                trajectoryComponent.Update();
             }
         }
 
