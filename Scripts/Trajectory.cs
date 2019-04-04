@@ -29,6 +29,14 @@ public class Trajectory : MonoBehaviour
         UpdatePoints();
     }
 
+    public bool IsBehind(float offset) {
+        return (int) Math.Truncate((decimal) offset) > m_trajectory.Count - 2;
+    }
+
+    public bool IsBefore(float offset) {
+        return offset < 0;
+    }
+
     public Vector3 GetAt(float offset) {
         int section = (int) Math.Truncate((decimal) offset);
         return GetAt(section, offset - section);
@@ -91,9 +99,14 @@ public class Trajectory : MonoBehaviour
     }
 
     void OnDrawGizmos() {
+        m_trajectory[0] = transform.position;
+        if (goal != null) {
+            m_trajectory[m_trajectory.Count - 1] = goal.position;
+        }
+
         Gizmos.color = Color.magenta;
         foreach(Vector3 p in trajectory) {
-            Gizmos.DrawSphere(p, 0.1f);
+            Gizmos.DrawSphere(p, 0.04f);
         }
 
         Gizmos.color = new Color(0.5f, 0.4f, 1.0f, 0.8f);
@@ -108,7 +121,7 @@ public class Trajectory : MonoBehaviour
     void OnDrawGizmosSelected() {
         Gizmos.color = Color.red;
         foreach(Vector3 p in trajectory) {
-            Gizmos.DrawSphere(p, 0.15f);
+            Gizmos.DrawSphere(p, 0.05f);
         }
     }
 }
