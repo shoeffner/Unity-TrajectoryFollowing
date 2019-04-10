@@ -51,15 +51,15 @@ public class MoveAlongTrajectory : MonoBehaviour
         StartCoroutine(DelayedStart(startAfter));
     }
 
-    /**
-     * If the GameObject is "moving", that is moving == true, this updates the position.
-     * First, the travel time and speed determine the distance traveled along the trajectory.
-     * If the next point (that is the look ahead offset on the trajectory) is further away than
-     * the travel distance, the object is moved towards that position. Otherwise, a point which is
-     * away far enough is retrieved and the object is moved towards it.
-     * If the goal is reached, i.e. within travel distance, movement is stopped and the goal set
-     * as the new position.
-     */
+    /// <summary>
+    /// If the GameObject is "moving", that is moving == true, this updates the position.
+    /// First, the travel time and speed determine the distance traveled along the trajectory.
+    /// If the next point (that is the look ahead offset on the trajectory) is further away than
+    /// the travel distance, the object is moved towards that position. Otherwise, a point which is
+    /// away far enough is retrieved and the object is moved towards it.
+    /// If the goal is reached, i.e. within travel distance, movement is stopped and the goal set
+    /// as the new position.
+    /// </summary>
     public void FixedUpdate() {
         if (moving) {
             float travelDistance = Time.fixedDeltaTime * speed;
