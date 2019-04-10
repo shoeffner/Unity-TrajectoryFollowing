@@ -99,10 +99,9 @@ public class Trajectory : MonoBehaviour
     }
 
     void OnDrawGizmos() {
-       m_trajectory[0] = transform.position;
-       if (goal != null) {
-            m_trajectory[m_trajectory.Count - 1] = goal.position;
-       }
+        if (!Application.isPlaying) {
+            UpdatePoints();
+        }
 
         Gizmos.color = Color.magenta;
         foreach(Vector3 p in trajectory) {
