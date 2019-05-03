@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 
-[ExecuteInEditMode]
+[System.Serializable, ExecuteInEditMode]
 public class Trajectory : MonoBehaviour
 {
     public enum InterpolationMethod {
@@ -35,6 +35,14 @@ public class Trajectory : MonoBehaviour
 
     public bool IsBefore(float offset) {
         return offset < 0;
+    }
+
+    public Vector3 GetStart() {
+        return GetAt(0);
+    }
+
+    public Vector3 GetEnd() {
+        return GetAt(m_trajectory.Count - 1);
     }
 
     public Vector3 GetAt(float offset) {

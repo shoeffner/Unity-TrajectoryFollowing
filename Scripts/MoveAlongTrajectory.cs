@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(Trajectory))]
 public class MoveAlongTrajectory : MonoBehaviour
@@ -7,16 +8,25 @@ public class MoveAlongTrajectory : MonoBehaviour
     [Tooltip("The trajectory to move along.")]
     public Trajectory trajectory;
 
-    [Range(0.01f, 10.0f), Tooltip("Movement speed in meters (i.e. units) per second.")]
-    public float speed = 1.0f;
+    [Range(-10.0f, 10.0f), Tooltip("Movement speed in meters (i.e. units) per second.")]
+    public float speed = 0.0f;
+
+    [Tooltip("Start automatically.")]
+    public bool autostart = false;
 
     [Range(0.0f, 10.0f), Tooltip("Start after this time (in seconds).")]
     public float startAfter = 0.0f;
+    private float delayedStartSpeed = 0.0f;
+
 
     [Tooltip("Use transform updates to avoid physics calculations.")]
     public bool ignorePhysics = false;
 
+    [Tooltip("Input to start and stop movement.")]
+    public List<string> enableMovementWith = new List<string>(){"Jump"};
+
     private float currentOffset;
+    private float currentDirection = 1.0f;
     private float lookAhead = 0.1f;
     private Vector3 currentTarget;
     private bool moving = false;
@@ -29,7 +39,9 @@ public class MoveAlongTrajectory : MonoBehaviour
                 Debug.LogError("Trajectory required to move along.");
             }
         }
+    }
 
+    public void Start() {
         // Initialize look-ahead and first target point.
         currentOffset = lookAhead;
         currentTarget = trajectory.GetAt(currentOffset);
@@ -45,14 +57,22 @@ public class MoveAlongTrajectory : MonoBehaviour
                 rigidbody.isKinematic = true;
             }
         }
+
+        if (autostart) {
+            delayedStartSpeed = speed;
+            StartCoroutine(DelayedStart(startAfter));
+        }
     }
 
-    public void Start() {
-        StartCoroutine(DelayedStart(startAfter));
+    public void Update() {
+        foreach(string button in enableMovementWith) {
+            if (Input.GetButtonDown(button)) {
+                moving = !moving;
+            }
+        }
     }
 
     /// <summary>
-    /// If the GameObject is "moving", that is moving == true, this updates the position.
     /// First, the travel time and speed determine the distance traveled along the trajectory.
     /// If the next point (that is the look ahead offset on the trajectory) is further away than
     /// the travel distance, the object is moved towards that position. Otherwise, a point which is
@@ -62,14 +82,27 @@ public class MoveAlongTrajectory : MonoBehaviour
     /// </summary>
     public void FixedUpdate() {
         if (moving) {
-            float travelDistance = Time.fixedDeltaTime * speed;
+            if (Mathf.Sign(speed) != Mathf.Sign(currentDirection)) {
+                currentDirection = Mathf.Sign(speed);
+                currentOffset += lookAhead * Mathf.Sign(speed);
+                currentTarget = trajectory.GetAt(currentOffset);
+            }
+
+            float travelDistance = Time.fixedDeltaTime * Mathf.Abs(speed);
             float distance = Vector3.Distance(transform.position, currentTarget);
             while (travelDistance >= distance) {
-                currentOffset += lookAhead;
+                currentOffset += lookAhead * Mathf.Sign(speed);
                 currentTarget = trajectory.GetAt(currentOffset);
                 distance = Vector3.Distance(transform.position, currentTarget);
-                if (trajectory.IsBehind(currentOffset) || trajectory.IsBefore(currentOffset)) {
-                    StopMoving();
+                if (trajectory.IsBehind(currentOffset)) {
+                    currentOffset = Mathf.Round(currentOffset) + lookAhead;
+                    currentTarget = trajectory.GetEnd();
+                    moving = false;
+                    break;
+                } else if (trajectory.IsBefore(currentOffset)) {
+                    currentOffset = -lookAhead;
+                    currentTarget = trajectory.GetStart();
+                    moving = false;
                     break;
                 }
             }
@@ -87,16 +120,7 @@ public class MoveAlongTrajectory : MonoBehaviour
 
     IEnumerator DelayedStart(float timeToWait) {
         yield return new WaitForSeconds(timeToWait);
-        StartMoving();
-    }
-
-    public void StartMoving() {
-        Debug.Log("Starting trajectory following.");
+        speed = delayedStartSpeed;
         moving = true;
-    }
-
-    public void StopMoving() {
-        Debug.Log("Stopping trajectory following.");
-        moving = false;
     }
 }
