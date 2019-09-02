@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 
+namespace TrajectoryFollowing {
+
 [System.Serializable, ExecuteInEditMode]
 public class Trajectory : MonoBehaviour
 {
@@ -131,4 +133,6 @@ public class Trajectory : MonoBehaviour
             Gizmos.DrawSphere(p, 0.05f);
         }
     }
+}
+
 }

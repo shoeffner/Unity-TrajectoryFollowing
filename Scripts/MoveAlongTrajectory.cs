@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 
+namespace TrajectoryFollowing {
+
 [RequireComponent(typeof(Trajectory))]
 public class MoveAlongTrajectory : MonoBehaviour
 {
@@ -123,4 +125,6 @@ public class MoveAlongTrajectory : MonoBehaviour
         speed = delayedStartSpeed;
         moving = true;
     }
+}
+
 }

@@ -2,6 +2,8 @@
 using UnityEditor;
 using UnityEngine;
 
+namespace TrajectoryFollowing {
+
 [CustomEditor(typeof(Trajectory))]
 public class TrajectoryEditor : Editor
 {
@@ -21,4 +23,6 @@ public class TrajectoryEditor : Editor
         }
 
     }
+}
+
 }
