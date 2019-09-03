@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using UnityEditor;
 
 namespace TrajectoryFollowing {
 
@@ -13,21 +14,42 @@ public class Trajectory : MonoBehaviour
     }
 
     [Tooltip("The trajectory points. Always includes this GameObject's transform and optionally a goal transform.")]
-    public List<Vector3> trajectory = new List<Vector3>(new Vector3[] {
-        new Vector3(1f, 0f, 0f),
-        new Vector3(2f, 0f, 0f),
-        new Vector3(3f, 0f, 0f),
-        new Vector3(4f, 0f, 0f),
-    });
+    public List<GameObject> trajectory = new List<GameObject>();
+
     private List<Vector3> m_trajectory;
 
     [Tooltip("The trajectory goal - if empty, the last point of the trajectory is the goal.")]
-    public Transform goal;
+    public GameObject goal;
 
     [Tooltip("The interpolation method to use.")]
     public InterpolationMethod interpolationMethod;
 
     public void Awake() {
+        m_trajectory = new List<Vector3>();
+        m_trajectory.Add(gameObject.transform.position);
+    }
+
+    public void Start() {
+        if (trajectory.Count == 0) {
+            Transform trajectoryTransform = gameObject.transform.Find("Trajectory");
+            if (trajectoryTransform == null) {
+                trajectoryTransform = new GameObject("Trajectory").transform;
+                trajectoryTransform.parent = gameObject.transform;
+                trajectoryTransform.SetPositionAndRotation(gameObject.transform.position, Quaternion.identity);
+            }
+            string prefabPath = "Assets/TrajectoryFollowing/Prefabs/TrajectoryPoint.prefab";
+
+            for (int i = 1; i <= 4; ++i) {
+                GameObject prefab = (GameObject) PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath), trajectoryTransform);
+                prefab.name = $"Trajectory {i}";
+                prefab.transform.SetPositionAndRotation(trajectoryTransform.position + new Vector3(0, 0, i), Quaternion.identity);
+                trajectory.Add(prefab);
+            }
+        }
+        if (Application.isPlaying) {
+            Transform trajectoryTransform = gameObject.transform.Find("Trajectory");
+            trajectoryTransform.DetachChildren();
+        }
         UpdatePoints();
     }
 
@@ -101,10 +123,17 @@ public class Trajectory : MonoBehaviour
     }
 
     public void UpdatePoints() {
-        m_trajectory = new List<Vector3>(trajectory);
-        m_trajectory.Insert(0, transform.position);
+        m_trajectory = new List<Vector3>(trajectory.Capacity);
+        if (gameObject != null) {
+            m_trajectory.Add(gameObject.transform.position);
+        }
+        if (trajectory != null) {
+            foreach (GameObject point in trajectory) {
+                m_trajectory.Add(point.transform.position);
+            }
+        }
         if (goal != null) {
-            m_trajectory.Add(goal.position);
+            m_trajectory.Add(goal.transform.position);
         }
     }
 
@@ -113,12 +142,7 @@ public class Trajectory : MonoBehaviour
             UpdatePoints();
         }
 
-        Gizmos.color = Color.magenta;
-        foreach(Vector3 p in trajectory) {
-            Gizmos.DrawSphere(p, 0.04f);
-        }
-
-        Gizmos.color = new Color(0.5f, 0.4f, 1.0f, 0.8f);
+        Gizmos.color = new Color(0.5f, 0.2f, 0.4f, 0.8f);
         float stepSize = 0.05f;
         for (int section = 0; section < m_trajectory.Count; ++section) {
             for (float offset = 0; offset <= 1; offset += stepSize) {
@@ -128,9 +152,12 @@ public class Trajectory : MonoBehaviour
     }
 
     void OnDrawGizmosSelected() {
-        Gizmos.color = Color.red;
-        foreach(Vector3 p in trajectory) {
-            Gizmos.DrawSphere(p, 0.05f);
+        Gizmos.color = new Color(0.5f, 0.6f, 0.8f, 0.8f);
+        float stepSize = 0.05f;
+        for (int section = 0; section < m_trajectory.Count; ++section) {
+            for (float offset = 0; offset <= 1; offset += stepSize) {
+                Gizmos.DrawLine(GetAt(section, offset), GetAt(section, offset + stepSize));
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,21 +7,24 @@ namespace TrajectoryFollowing {
 [CustomEditor(typeof(Trajectory))]
 public class TrajectoryEditor : Editor
 {
-    protected virtual void OnSceneGUI()
-    {
-        Trajectory trajectoryComponent = (Trajectory)target;
-        List<Vector3> trajectory = trajectoryComponent.trajectory;
+}
 
-        for (int i = 0; i < trajectory.Count; ++i) {
-            EditorGUI.BeginChangeCheck();
-            Vector3 target = Handles.PositionHandle(trajectory[i], Quaternion.identity);
-            if (EditorGUI.EndChangeCheck()) {
-                Undo.RecordObject(trajectoryComponent, "Change trajectory.");
-                trajectory[i] = target;
-                trajectoryComponent.UpdatePoints();
-            }
+[InitializeOnLoad]
+static class InstallGizmos {
+    static InstallGizmos() {
+        string srcDir = Application.dataPath + "/TrajectoryFollowing/Gizmos/TrajectoryFollowing";
+        string destDir = Application.dataPath + "/Gizmos/TrajectoryFollowing";
+        if (!Directory.Exists(destDir)) {
+            Directory.CreateDirectory(destDir);
         }
 
+        foreach (string gizmos in Directory.GetFiles(srcDir)) {
+            string[] pathparts = gizmos.Split('/');
+            string filename = pathparts[pathparts.Length - 1];
+            if (filename.EndsWith(".png")) {
+                File.Copy(gizmos, destDir + "/" + filename, true);
+            }
+        }
     }
 }
 
