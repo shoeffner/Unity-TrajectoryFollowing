@@ -21,7 +21,7 @@ static class InstallGizmos {
         foreach (string gizmos in Directory.GetFiles(srcDir)) {
             string[] pathparts = gizmos.Split('/');
             string filename = pathparts[pathparts.Length - 1];
-            if (filename.EndsWith(".png")) {
+            if (!filename.EndsWith(".meta")) {
                 File.Copy(gizmos, destDir + "/" + filename, true);
             }
         }
