@@ -60,8 +60,8 @@ public class MoveAlongTrajectory : MonoBehaviour
             }
         }
 
+        delayedStartSpeed = speed;
         if (autostart) {
-            delayedStartSpeed = speed;
             StartCoroutine(DelayedStart(startAfter));
         }
     }
@@ -120,7 +120,7 @@ public class MoveAlongTrajectory : MonoBehaviour
         }
     }
 
-    IEnumerator DelayedStart(float timeToWait) {
+    public IEnumerator DelayedStart(float timeToWait) {
         yield return new WaitForSeconds(timeToWait);
         speed = delayedStartSpeed;
         moving = true;

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.SceneManagement;
 
 namespace TrajectoryFollowing {
 
@@ -22,33 +23,28 @@ public class Trajectory : MonoBehaviour
     public GameObject goal;
 
     [Tooltip("The interpolation method to use.")]
-    public InterpolationMethod interpolationMethod;
+    public InterpolationMethod interpolationMethod = InterpolationMethod.HermiteSpline;
 
     public void Awake() {
         m_trajectory = new List<Vector3>();
-        m_trajectory.Add(gameObject.transform.position);
     }
 
     public void Start() {
         if (trajectory.Count == 0) {
-            Transform trajectoryTransform = gameObject.transform.Find("Trajectory");
+            Transform trajectoryTransform = gameObject.transform.Find($"{gameObject.name}Trajectory");
             if (trajectoryTransform == null) {
-                trajectoryTransform = new GameObject("Trajectory").transform;
-                trajectoryTransform.parent = gameObject.transform;
+                GameObject trajectoryGameObject = new GameObject($"{gameObject.name}Trajectory");
+                SceneManager.MoveGameObjectToScene(trajectoryGameObject, gameObject.scene);
+                trajectoryTransform = trajectoryGameObject.transform;
                 trajectoryTransform.SetPositionAndRotation(gameObject.transform.position, Quaternion.identity);
             }
-            string prefabPath = "Assets/TrajectoryFollowing/Prefabs/TrajectoryPoint.prefab";
 
             for (int i = 1; i <= 4; ++i) {
-                GameObject prefab = (GameObject) PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath), trajectoryTransform);
+                GameObject prefab = (GameObject) PrefabUtility.InstantiatePrefab(Resources.Load<GameObject>("Prefabs/TrajectoryPoint"), trajectoryTransform);
                 prefab.name = $"Trajectory {i}";
                 prefab.transform.SetPositionAndRotation(trajectoryTransform.position + new Vector3(0, 0, i), Quaternion.identity);
                 trajectory.Add(prefab);
             }
-        }
-        if (Application.isPlaying) {
-            Transform trajectoryTransform = gameObject.transform.Find("Trajectory");
-            trajectoryTransform.DetachChildren();
         }
         UpdatePoints();
     }
@@ -75,6 +71,10 @@ public class Trajectory : MonoBehaviour
     }
 
     public Vector3 GetAt(int section, float offset) {
+        if (m_trajectory.Count == 0) {
+            return transform.position;
+        }
+
         if (section < 0) {
             return m_trajectory[0];
         } else if (section > m_trajectory.Count - 2) {
@@ -129,7 +129,9 @@ public class Trajectory : MonoBehaviour
         }
         if (trajectory != null) {
             foreach (GameObject point in trajectory) {
-                m_trajectory.Add(point.transform.position);
+                if (point != null) {
+                    m_trajectory.Add(point.transform.position);
+                }
             }
         }
         if (goal != null) {
