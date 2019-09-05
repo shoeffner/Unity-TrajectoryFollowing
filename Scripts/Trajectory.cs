@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 namespace TrajectoryFollowing {
 
-[System.Serializable, ExecuteInEditMode]
+[System.Serializable, ExecuteAlways]
 public class Trajectory : MonoBehaviour
 {
     public enum InterpolationMethod {

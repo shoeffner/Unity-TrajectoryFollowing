@@ -69,7 +69,7 @@ public class MoveAlongTrajectory : MonoBehaviour
     public void Update() {
         foreach(string button in enableMovementWith) {
             if (Input.GetButtonDown(button)) {
-                moving = !moving;
+                StartCoroutine(DelayedStart(0));
             }
         }
     }
@@ -99,12 +99,18 @@ public class MoveAlongTrajectory : MonoBehaviour
                 if (trajectory.IsBehind(currentOffset)) {
                     currentOffset = Mathf.Round(currentOffset) + lookAhead;
                     currentTarget = trajectory.GetEnd();
-                    moving = false;
+                    if ((currentTarget - transform.position).magnitude < lookAhead / 4)
+                    {
+                        moving = false;
+                    }
                     break;
                 } else if (trajectory.IsBefore(currentOffset)) {
                     currentOffset = -lookAhead;
                     currentTarget = trajectory.GetStart();
-                    moving = false;
+                    if ((currentTarget - transform.position).magnitude < lookAhead / 4)
+                    {
+                        moving = false;
+                    }
                     break;
                 }
             }
@@ -121,7 +127,12 @@ public class MoveAlongTrajectory : MonoBehaviour
     }
 
     public IEnumerator DelayedStart(float timeToWait) {
-        yield return new WaitForSeconds(timeToWait);
+        if (timeToWait > 0)
+        {
+            yield return new WaitForSeconds(timeToWait);
+        }
+        currentOffset = lookAhead;
+        currentTarget = trajectory.GetAt(currentOffset);
         speed = delayedStartSpeed;
         moving = true;
     }
