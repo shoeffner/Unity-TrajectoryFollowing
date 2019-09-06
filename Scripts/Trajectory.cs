@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine.SceneManagement;
 
 namespace TrajectoryFollowing {
@@ -40,7 +42,11 @@ public class Trajectory : MonoBehaviour
             }
 
             for (int i = 1; i <= 4; ++i) {
+                #if UNITY_EDITOR
                 GameObject prefab = (GameObject) PrefabUtility.InstantiatePrefab(Resources.Load<GameObject>("Prefabs/TrajectoryPoint"), trajectoryTransform);
+                #else
+                GameObject prefab = Instantiate(Resources.Load<GameObject>("Prefabs/TrajectoryPoint"));
+                #endif
                 prefab.name = $"Trajectory {i}";
                 prefab.transform.SetPositionAndRotation(trajectoryTransform.position + new Vector3(0, 0, i), Quaternion.identity);
                 trajectory.Add(prefab);
