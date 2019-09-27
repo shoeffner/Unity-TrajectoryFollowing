@@ -16,6 +16,8 @@ public class Trajectory : MonoBehaviour
         HermiteSpline
     }
 
+    public AnimationCurve speedCurve = AnimationCurve.Constant(0, 1, 1);
+
     [Tooltip("The trajectory points. Always includes this GameObject's transform and optionally a goal transform.")]
     public List<GameObject> trajectory = new List<GameObject>();
 
@@ -102,6 +104,27 @@ public class Trajectory : MonoBehaviour
             default:
                 return Vector3.Lerp(startPos, endPos, offset);
         }
+    }
+
+    public float GetSpeedModifierAt(float offset) {
+        int section = (int) Math.Truncate((decimal) offset);
+        return GetSpeedModifierAt(section, offset - section);
+    }
+
+    public float GetSpeedModifierAt(int section, float offset) {
+        if (speedCurve.length == 0) {
+            return 1;
+        }
+
+        if (section < 0) {
+            return speedCurve.Evaluate(0);
+        } else if (section > m_trajectory.Count - 2) {
+            return speedCurve.Evaluate(1);
+        }
+
+        float current = (float) section / (float) m_trajectory.Count;
+        float next = (float) (section + 1) / (float) m_trajectory.Count;
+        return speedCurve.Evaluate(current + (next - current) * offset);
     }
 
     private static Vector3 HermiteSplineInterpolation(Vector3 before, Vector3 start, Vector3 end, Vector3 after, float offset) {

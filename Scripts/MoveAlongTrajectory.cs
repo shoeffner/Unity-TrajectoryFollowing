@@ -20,7 +20,6 @@ public class MoveAlongTrajectory : MonoBehaviour
     public float startAfter = 0.0f;
     private float delayedStartSpeed = 0.0f;
 
-
     [Tooltip("Use transform updates to avoid physics calculations.")]
     public bool ignorePhysics = false;
 
@@ -84,13 +83,14 @@ public class MoveAlongTrajectory : MonoBehaviour
     /// </summary>
     public void FixedUpdate() {
         if (moving) {
+            float speedMultiplier = trajectory.GetSpeedModifierAt(currentOffset);
             if (Mathf.Sign(speed) != Mathf.Sign(currentDirection)) {
                 currentDirection = Mathf.Sign(speed);
                 currentOffset += lookAhead * Mathf.Sign(speed);
                 currentTarget = trajectory.GetAt(currentOffset);
             }
 
-            float travelDistance = Time.fixedDeltaTime * Mathf.Abs(speed);
+            float travelDistance = Time.fixedDeltaTime * Mathf.Abs(speed) * speedMultiplier;
             float distance = Vector3.Distance(transform.position, currentTarget);
             while (travelDistance >= distance) {
                 currentOffset += lookAhead * Mathf.Sign(speed);
