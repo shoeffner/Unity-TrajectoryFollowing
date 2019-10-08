@@ -136,6 +136,13 @@ public class MoveAlongTrajectory : MonoBehaviour
         speed = delayedStartSpeed;
         moving = true;
     }
+
+    public float TraveledProportion()
+    {
+        float proportion = currentOffset / (trajectory.trajectory.Count + 1);
+        // clamp to 0..1
+        return proportion > 1 ? 1 : (proportion < 0 ? 0 : proportion);
+    }
 }
 
 }
