@@ -114,7 +114,11 @@ public class MoveAlongTrajectory : MonoBehaviour
             }
 
             // position + direction * distance
-            Vector3 newPosition = transform.position + (currentTarget - transform.position).normalized * travelDistance;
+            Vector3 toTravel = (currentTarget - transform.position).normalized * travelDistance;
+            Vector3 newPosition = transform.position + toTravel;
+            if (toTravel.magnitude >= distance) {
+                newPosition = currentTarget;
+            }
             if (ignorePhysics) {
                 transform.position = newPosition;
             } else {
