@@ -18,7 +18,6 @@ public class MoveAlongTrajectory : MonoBehaviour
 
     [Range(0.0f, 10.0f), Tooltip("Start after this time (in seconds).")]
     public float startAfter = 0.0f;
-    private float delayedStartSpeed = 0.0f;
 
     [Tooltip("Use transform updates to avoid physics calculations.")]
     public bool ignorePhysics = false;
@@ -59,7 +58,6 @@ public class MoveAlongTrajectory : MonoBehaviour
             }
         }
 
-        delayedStartSpeed = speed;
         if (autostart) {
             StartCoroutine(DelayedStart(startAfter));
         }
@@ -133,7 +131,6 @@ public class MoveAlongTrajectory : MonoBehaviour
         }
         currentOffset = lookAhead;
         currentTarget = trajectory.GetAt(currentOffset);
-        speed = delayedStartSpeed;
         moving = true;
     }
 
